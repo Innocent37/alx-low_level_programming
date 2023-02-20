@@ -1,0 +1,9 @@
+#!/bin/bash
+
+git add .
+char n="commit"
+ printf("commit massage?")
+scanf("%c", &n);
+git commit -m "&n"
+
+git push
