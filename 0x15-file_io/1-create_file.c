@@ -1,50 +1,45 @@
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
+#include "main.h"
 
 /**
- * create_file - creates a file with a file naeme
- * @filename: points to the file
- * @text_content: a points to a file tha will write
+ * create_file - Creates a file.
+ * @filename: The name of the file to create.
+ * @text_content: The text content to write to the file.
  *
- * Return: 1 is fails else -1
+ * Return: 1 on success, -1 on failure.
  */
-
 int create_file(const char *filename, char *text_content)
 {
-	int len = 0;
-	FILE *file = NULL;
-	int w = 0;
+	FILE *file;
+	int w, len = 0;
 
 	if (filename == NULL)
 		return (-1);
 
 	if (text_content != NULL)
 	{
-
-		while (text_content[len] != '\0')
+		while (text_content[len])
 			len++;
 	}
-		file = fopen(filename, "w");
-		if (file == NULL)
+
+	file = fopen(filename, "w");
+	if (file == NULL)
 		return (-1);
 
 	if (text_content != NULL)
 	{
-
 		w = fwrite(text_content, sizeof(char), len, file);
-	if (w != len)
-	{
-
-		fclose(file);
-		return (-1);
-	}
+		if (w != len)
+		{
+			fclose(file);
+			return (-1);
+		}
 	}
 
 	fclose(file);
-	return (-1);
+
+	return (1);
 }
+
