@@ -10,37 +10,37 @@
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	FILE *files;
-	char *name;
-	ssize_t reading;
+	int file;
+	char *text;
+	ssize_t nletters, reading;
 
 	if (filename == NULL)
 		return (0);
 
-	files = fopen(filename, "r");
-	if (files == NULL)
+	file = open(filename, O_RDONLY);
+	if (file == -1)
 		return (0);
 
-	name = malloc(sizeof(char) * (letters + 1));
-	if (name == NULL)
+	text = malloc(sizeof(char) * (letters + 1));
+	if (text == NULL)
 	{
-		fclose(files);
+		close(file);
 		return (0);
 	}
 
-	reading = fread(name, sizeof(char), letters, files);
-	if (reading <= 0)
+	nletters = read(file, text, sizeof(char) * letters);
+	if (nletters == -1)
 	{
-		free(name);
-		fclose(files);
+		free(text);
+		close(file);
 		return (0);
 	}
 
-	name[reading] = '\0';
-	printf("%s", name);
+	text[nletters] = '\0';
+	printf("%s", text);
 
-	free(name);
-	fclose(files);
-	return (reading);
+	free(text);
+	close(file);
+	return (nletters);
 }
 
