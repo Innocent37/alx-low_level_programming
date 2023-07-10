@@ -1,116 +1,47 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include "main.h"
 
-#define BUF_SIZE 1024
-
-/* Function Prototypes */
-int open_file(const char *filename, int flags, int mode);
-void close_file_descriptor(int fd);
-char *allocate_buffer(char *file);
-
 /**
- * main - Entry point
- * @argc: The number of arguments
- * @argv: An array of strings containing the arguments
- *
- * Return: 0 on success, or the corresponding exit code on failure
- */
-int main(int argc, char *argv[])
+* main - copy info from file_from to file_to.
+* @ac: number of arguments
+* @av: array of arguments
+* Return: Always 0.
+*/
+
+int main(int ac, char **av)
 {
-	int file_from, file_to, r, w;
-	char *buffer;
+	int file_from, file_to;
+	ssize_t  l_read = 1024, l_write, close_file;
+	char content[1024];
 
-	if (argc != 3)
+	if (ac != 3)
+	{ dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+		exit(97); }
+	file_from = open(av[1], O_RDONLY);
+	if (file_from == -1)
+	{ dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", av[1]),
+		exit(98); }
+	file_to = open(av[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	if (file_to == -1)
+	{ dprintf(STDERR_FILENO, "Error: Can't write to %s\n", av[2]);
+		exit(99); }
+	while (l_read == 1024)
 	{
-		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-		exit(97);
+		l_read = read(file_from, content, 1024);
+		if (l_read == -1)
+		{ dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", av[1]);
+			exit(98); }
+		l_write = write(file_to, content, l_read);
+		if (l_write == -1)
+		{ dprintf(STDERR_FILENO, "Error: Can't write to %s\n", av[2]);
+			exit(99); }
 	}
-
-	buffer = allocate_buffer(argv[2]);
-	file_from = open_file(argv[1], O_RDONLY, 0);
-	file_to = open_file(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0644);
-
-	do {
-		r = read(file_from, buffer, BUF_SIZE);
-		if (file_from == -1 || r == -1)
-		{
-			dprintf(STDERR_FILENO,
-				"Error: Can't read from file %s\n", argv[1]);
-			free(buffer);
-			exit(98);
-		}
-
-		w = write(file_to, buffer, r);
-		if (file_to == -1 || w == -1)
-		{
-			dprintf(STDERR_FILENO,
-				"Error: Can't write to %s\n", argv[2]);
-			free(buffer);
-			exit(99);
-		}
-
-	} while (r > 0);
-
-	close_file_descriptor(file_from);
-	close_file_descriptor(file_to);
-	free(buffer);
-
-	return (0);
+	close_file = close(file_from);
+	if (close_file == -1)
+	{ dprintf(STDERR_FILENO, "Error: Can't close fd  %d\n", file_from);
+		exit(100); }
+	close_file = close(file_to);
+	if (close_file == -1)
+	{ dprintf(STDERR_FILENO, "Error: Can't close fd  %d\n", file_to);
+		exit(100); }
+return (0);
 }
-
-/**
- * open_file - Opens a file
- * @filename: The name of the file to open
- * @flags: The flags to use when opening the file
- * @mode: The file mode to set if creating the file
- *
- * Return: The file descriptor of the opened file, or -1 on failure
- */
-int open_file(const char *filename, int flags, int mode)
-{
-	int fd = open(filename, flags, mode);
-
-	if (fd == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", filename);
-		exit(98);
-	}
-
-	return (fd);
-}
-
-/**
- * close_file_descriptor - Closes a file descriptor
- * @fd: The file descriptor to close
- */
-void close_file_descriptor(int fd)
-{
-	if (close(fd) == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
-		exit(100);
-	}
-}
-
-/**
- * allocate_buffer - Allocates memory for a buffer
- * @file: The name of the file buffer is storing chars for
- *
- * Return: A pointer to the newly-allocated buffer
- */
-char *allocate_buffer(char *file)
-{
-	char *buffer = malloc(sizeof(char) * BUF_SIZE);
-
-	if (buffer == NULL)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file);
-		exit(99);
-	}
-
-	return (buffer);
-}
-
