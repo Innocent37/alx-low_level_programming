@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "main.h"
 
 /**
@@ -9,42 +6,41 @@
  * @letters: The number of letters to read and print.
  *
  * Return: The actual number of letters read and printed.
- * if filename is NULL, or if not
+ *         Returns 0 if filename is NULL or if an error occurs.
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
 	FILE *files;
-		char *name;
-		ssize_t reading;
+	char *name;
+	ssize_t reading;
 
-		if (filename == NULL)
-			return (0);
-		files = fopen(filename, "r");
+	if (filename == NULL)
+		return (0);
 
-		if (files == NULL)
-			return (0);
+	files = fopen(filename, "r");
+	if (files == NULL)
+		return (0);
 
-		name = malloc(letters + 1);
+	name = malloc(sizeof(char) * (letters + 1));
+	if (name == NULL)
+	{
+		fclose(files);
+		return (0);
+	}
 
-		if (name == NULL)
-		{
-			fclose(files);
-				return (0);
-		}
-
-		reading = fread(name, sizeof(char), letters, files);
-		if (reading <= 0)
-		{
-			free(name);
-			fclose(files);
-			return (0);
-		}
-
-		name[reading] = '\0';
-		printf("%s", name);
-
+	reading = fread(name, sizeof(char), letters, files);
+	if (reading <= 0)
+	{
 		free(name);
 		fclose(files);
-		return (reading);
+		return (0);
+	}
+
+	name[reading] = '\0';
+	printf("%s", name);
+
+	free(name);
+	fclose(files);
+	return (reading);
 }
 
