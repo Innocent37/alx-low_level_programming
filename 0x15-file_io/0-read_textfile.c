@@ -10,36 +10,36 @@
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	int files;
-	char *name;
-	ssize_t reading;
+	ssize_t nletters;
+	int file;
+	char *text;
 
 	if (!filename)
 		return (0);
-	files = open(filename, O_RDONLY);
-	if (name == NULL)
+	text = malloc(sizeof(char) * letters + 1);
+	if (text == NULL)
 		return (0);
-	name = malloc(sizeof(char) * letters + 1);
-	if (files == -1)
+	file = open(filename, O_RDONLY);
+	if (file == -1)
 	{
-		free(name);
-		return (0);
-	}
-	reading = read(files, name, sizeof(char) * letters);
-	if (reading == -1)
-	{
-		free(name);
-		close(files);
+		free(text);
 		return (0);
 	}
-	reading = write(STDOUT_FILENO, name, reading);
-	if (reading == -1)
+	nletters = read(file, text, sizeof(char) * letters);
+	if (nletters == -1)
 	{
-	free(name);
-	close(files);
-	return (0);
+		free(text);
+		close(file);
+		return (0);
+	}
+	nletters = write(STDOUT_FILENO, text, nletters);
+	if (nletters == -1)
+	{
+		free(text);
+		close(file);
+		return (0);
+	}
+	free(text);
+	close(file);
+	return (nletters);
 }
-	free(name);
-	close(files);
-	return (reading);
-	}
